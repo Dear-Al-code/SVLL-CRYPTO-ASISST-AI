@@ -1,10 +1,112 @@
 # Sovereign AI Agent Server (Ollama)
 
-Servidor backend que corre los agentes IA usando **Ollama** para inferencia local.
+Backend server for AI agents using **Ollama** for local inference.
 
-## Setup
+---
 
-### 1. Instalar Ollama
+## 🇬🇧 English
+
+### Setup
+
+#### 1. Install Ollama
+
+```bash
+# Linux
+curl -fsSL https://ollama.com/install.sh | sh
+
+# Start service
+ollama serve
+```
+
+#### 2. Download models
+
+```bash
+# Primary model (recommended)
+ollama pull qwen2.5:32b
+
+# Fallback model (lighter, used if qwen2.5 fails)
+ollama pull llama3.2
+```
+
+#### 3. Install dependencies
+
+```bash
+npm install
+cp .env.example .env
+# Edit .env with CONTRACT_ADDRESS and Ollama config
+```
+
+#### 4. Start server
+
+```bash
+npm start
+```
+
+### Ollama Configuration
+
+In `.env`:
+```bash
+OLLAMA_URL=http://localhost:11434
+OLLAMA_MODEL=qwen2.5:32b
+OLLAMA_FALLBACK_MODEL=llama3.2
+```
+
+### Models:
+
+- **Primary**: `qwen2.5:32b` - High performance, 32B parameters
+- **Fallback**: `llama3.2` - Lightweight, 3B parameters (used automatically if primary fails)
+
+**The server uses automatic fallback**: if qwen2.5 crashes or takes too long, it automatically retries with llama3.2
+
+### Endpoints
+
+#### `GET /health`
+Server health check
+
+#### `POST /verify-holder`
+Verify wallet ownership and get agent IDs
+```json
+{
+  "walletAddress": "0x..."
+}
+```
+
+#### `POST /agent/:agentId/task`
+Execute AI task on specific agent
+```json
+{
+  "task": "chat",
+  "message": "Your question here",
+  "walletAddress": "0x..."
+}
+```
+
+#### `GET /agent/:agentId`
+Get agent status
+
+#### `GET /agents`
+List active agents
+
+### Troubleshooting
+
+```bash
+# Check Ollama
+curl http://localhost:11434/api/tags
+
+# List installed models
+ollama list
+
+# Server logs
+npm run dev
+```
+
+---
+
+## 🇪🇸 Español
+
+### Configuración
+
+#### 1. Instalar Ollama
 
 ```bash
 # Linux
@@ -14,7 +116,7 @@ curl -fsSL https://ollama.com/install.sh | sh
 ollama serve
 ```
 
-### 2. Descargar modelos
+#### 2. Descargar modelos
 
 ```bash
 # Modelo principal (recomendado)
@@ -24,7 +126,7 @@ ollama pull qwen2.5:32b
 ollama pull llama3.2
 ```
 
-### 3. Instalar dependencias
+#### 3. Instalar dependencias
 
 ```bash
 npm install
@@ -32,13 +134,13 @@ cp .env.example .env
 # Edita .env con CONTRACT_ADDRESS y configuración de Ollama
 ```
 
-### 4. Iniciar servidor
+#### 4. Iniciar servidor
 
 ```bash
 npm start
 ```
 
-## Configuración Ollama
+### Configuración Ollama
 
 En `.env`:
 ```bash
@@ -54,19 +156,21 @@ OLLAMA_FALLBACK_MODEL=llama3.2
 
 **El servidor usa fallback automático**: si qwen2.5 crashea o demora mucho, automáticamente intenta con llama3.2
 
-## Endpoints
+### Endpoints
 
-### `GET /health`
+#### `GET /health`
 Health check del servidor
 
-### `POST /verify-holder`
+#### `POST /verify-holder`
+Verificar propiedad de wallet y obtener IDs de agentes
 ```json
 {
   "walletAddress": "0x..."
 }
 ```
 
-### `POST /agent/:agentId/task`
+#### `POST /agent/:agentId/task`
+Ejecutar tarea de IA en agente específico
 ```json
 {
   "task": "chat",
@@ -75,13 +179,13 @@ Health check del servidor
 }
 ```
 
-### `GET /agent/:agentId`
-Estado del agente
+#### `GET /agent/:agentId`
+Obtener estado del agente
 
-### `GET /agents`
-Lista agentes activos
+#### `GET /agents`
+Listar agentes activos
 
-## Troubleshooting
+### Troubleshooting
 
 ```bash
 # Verificar Ollama
