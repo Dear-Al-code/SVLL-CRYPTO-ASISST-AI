@@ -17,7 +17,7 @@ ollama serve
 ### 2. Descargar modelo
 
 ```bash
-ollama pull llama3.2
+ollama pull gpt-oss:20b
 ```
 
 ### 3. Instalar dependencias
@@ -39,15 +39,12 @@ npm start
 En `.env`:
 ```bash
 OLLAMA_URL=http://localhost:11434
-OLLAMA_MODEL=llama3.2
+OLLAMA_MODEL=gpt-oss:20b
 ```
 
-### Modelos disponibles:
+### Modelo:
 
-- `llama3.2` - Rápido, ligero (3B)
-- `llama3.1` - Más potente (8B)
-- `mistral` - Balance velocidad/calidad (7B)
-- `codellama` - Para código (7B)
+- `gpt-oss:20b` - Modelo open source de 20B parámetros **[Default]**
 
 ## Endpoints
 

@@ -81,7 +81,7 @@ function initializeAgent(tokenId, walletAddress) {
 /**
  * Llama a Ollama API para generar respuesta
  */
-async function callOllama(messages, model = 'llama3.2') {
+async function callOllama(messages, model = 'gpt-oss:20b') {
   const ollamaUrl = process.env.OLLAMA_URL || 'http://localhost:11434';
 
   try {
@@ -128,7 +128,7 @@ async function executeAgentTask(agentId, task, userMessage) {
 
   try {
     // Llamar a Ollama
-    const aiResponse = await callOllama(messages, process.env.OLLAMA_MODEL || 'llama3.2');
+    const aiResponse = await callOllama(messages, process.env.OLLAMA_MODEL || 'gpt-oss:20b');
 
     const response = {
       agentId,
