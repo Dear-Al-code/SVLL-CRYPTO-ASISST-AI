@@ -79,12 +79,16 @@ function initializeAgent(tokenId, walletAddress) {
 }
 
 /**
- * Llama a Ollama API para generar respuesta
+ * Llama a Ollama API para generar respuesta con fallback automático
  */
-async function callOllama(messages, model = 'gpt-oss:20b') {
+async function callOllama(messages, model = 'qwen2.5:32b', retryWithFallback = true) {
   const ollamaUrl = process.env.OLLAMA_URL || 'http://localhost:11434';
+  const fallbackModel = process.env.OLLAMA_FALLBACK_MODEL || 'llama3.2';
 
   try {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 60000); // 60s timeout
+
     const response = await fetch(`${ollamaUrl}/api/chat`, {
       method: 'POST',
       headers: {
@@ -95,16 +99,26 @@ async function callOllama(messages, model = 'gpt-oss:20b') {
         messages: messages,
         stream: false,
       }),
+      signal: controller.signal,
     });
 
+    clearTimeout(timeout);
+
     if (!response.ok) {
-      throw new Error(`Ollama API error: ${response.statusText}`);
+      throw new Error(`Ollama API error: ${response.status} ${response.statusText}`);
     }
 
     const data = await response.json();
     return data.message.content;
   } catch (error) {
-    console.error('Error calling Ollama:', error);
+    console.error(`Error calling Ollama with model ${model}:`, error.message);
+
+    // Si falla y tenemos un fallback, intentar con modelo más ligero
+    if (retryWithFallback && model !== fallbackModel) {
+      console.log(`⚠️ Retrying with fallback model: ${fallbackModel}`);
+      return await callOllama(messages, fallbackModel, false);
+    }
+
     throw error;
   }
 }
@@ -128,7 +142,7 @@ async function executeAgentTask(agentId, task, userMessage) {
 
   try {
     // Llamar a Ollama
-    const aiResponse = await callOllama(messages, process.env.OLLAMA_MODEL || 'gpt-oss:20b');
+    const aiResponse = await callOllama(messages, process.env.OLLAMA_MODEL || 'qwen2.5:32b');
 
     const response = {
       agentId,
