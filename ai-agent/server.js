@@ -79,25 +79,87 @@ function initializeAgent(tokenId, walletAddress) {
 }
 
 /**
- * Ejecuta una task del agente (aquí conectas con Claude/GPT)
+ * Llama a Ollama API para generar respuesta
+ */
+async function callOllama(messages, model = 'llama3.2') {
+  const ollamaUrl = process.env.OLLAMA_URL || 'http://localhost:11434';
+
+  try {
+    const response = await fetch(`${ollamaUrl}/api/chat`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: model,
+        messages: messages,
+        stream: false,
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`Ollama API error: ${response.statusText}`);
+    }
+
+    const data = await response.json();
+    return data.message.content;
+  } catch (error) {
+    console.error('Error calling Ollama:', error);
+    throw error;
+  }
+}
+
+/**
+ * Ejecuta una task del agente usando Ollama
  */
 async function executeAgentTask(agentId, task, userMessage) {
   const agent = agentSessions.get(agentId);
   if (!agent) return { error: 'Agent not found' };
 
-  // TODO: Aquí integras con Claude API o la IA que uses
-  // Por ahora, respuesta mock
-  const response = {
-    agentId,
-    task,
-    response: `Agente #${agent.tokenId} procesando: "${userMessage}". Integración con IA próximamente.`,
-    timestamp: Date.now(),
-  };
+  // Construir contexto del agente
+  const systemPrompt = `You are Agent #${agent.tokenId}, a personal AI assistant for your NFT holder. You are sovereign, privacy-focused, and always working in your owner's best interest. Task type: ${task}`;
 
-  // Guardar en historial
-  agent.tasks.push({ task, userMessage, response: response.response, timestamp: response.timestamp });
+  // Construir mensajes para Ollama
+  const messages = [
+    { role: 'system', content: systemPrompt },
+    ...agent.conversationHistory,
+    { role: 'user', content: userMessage },
+  ];
 
-  return response;
+  try {
+    // Llamar a Ollama
+    const aiResponse = await callOllama(messages, process.env.OLLAMA_MODEL || 'llama3.2');
+
+    const response = {
+      agentId,
+      task,
+      response: aiResponse,
+      timestamp: Date.now(),
+    };
+
+    // Guardar en historial
+    agent.conversationHistory.push(
+      { role: 'user', content: userMessage },
+      { role: 'assistant', content: aiResponse }
+    );
+
+    // Limitar historial a últimos 20 mensajes
+    if (agent.conversationHistory.length > 20) {
+      agent.conversationHistory = agent.conversationHistory.slice(-20);
+    }
+
+    agent.tasks.push({ task, userMessage, response: aiResponse, timestamp: response.timestamp });
+
+    return response;
+  } catch (error) {
+    return {
+      agentId,
+      task,
+      error: 'Failed to get AI response',
+      details: error.message,
+      timestamp: Date.now(),
+    };
+  }
 }
 
 // ========== ENDPOINTS ==========

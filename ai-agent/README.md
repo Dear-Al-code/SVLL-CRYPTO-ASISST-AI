@@ -1,60 +1,90 @@
-# Sovereign AI Agent Server
+# Sovereign AI Agent Server (Ollama)
 
-Servidor backend que corre los agentes IA para cada holder.
+Servidor backend que corre los agentes IA usando **Ollama** para inferencia local.
 
 ## Setup
 
-1. Instala dependencias:
+### 1. Instalar Ollama
+
+```bash
+# Linux
+curl -fsSL https://ollama.com/install.sh | sh
+
+# Iniciar servicio
+ollama serve
+```
+
+### 2. Descargar modelo
+
+```bash
+ollama pull llama3.2
+```
+
+### 3. Instalar dependencias
+
 ```bash
 npm install
-```
-
-2. Crea `.env` (usa `.env.example` como template):
-```bash
 cp .env.example .env
+# Edita .env con CONTRACT_ADDRESS y configuración de Ollama
 ```
 
-3. Edita `.env` con tus valores
+### 4. Iniciar servidor
 
-4. Corre el servidor:
 ```bash
 npm start
 ```
 
+## Configuración Ollama
+
+En `.env`:
+```bash
+OLLAMA_URL=http://localhost:11434
+OLLAMA_MODEL=llama3.2
+```
+
+### Modelos disponibles:
+
+- `llama3.2` - Rápido, ligero (3B)
+- `llama3.1` - Más potente (8B)
+- `mistral` - Balance velocidad/calidad (7B)
+- `codellama` - Para código (7B)
+
 ## Endpoints
 
-### GET `/health`
+### `GET /health`
 Health check del servidor
 
-### POST `/verify-holder`
-Verifica si una wallet es holder y retorna sus agentes
+### `POST /verify-holder`
 ```json
 {
   "walletAddress": "0x..."
 }
 ```
 
-### POST `/agent/:agentId/task`
-Ejecuta una task en un agente específico
+### `POST /agent/:agentId/task`
 ```json
 {
-  "task": "research",
-  "message": "Latest crypto news",
+  "task": "chat",
+  "message": "Tu pregunta aquí",
   "walletAddress": "0x..."
 }
 ```
 
-### GET `/agent/:agentId`
-Obtiene el estado de un agente
+### `GET /agent/:agentId`
+Estado del agente
 
-### GET `/agents`
-Lista todos los agentes activos
+### `GET /agents`
+Lista agentes activos
 
-## TODO
+## Troubleshooting
 
-- [ ] Integrar Claude API para respuestas reales
-- [ ] Agregar persistencia (Redis/PostgreSQL)
-- [ ] Implementar rate limiting
-- [ ] Agregar autenticación con JWT
-- [ ] WebSocket para comunicación real-time
-- [ ] Sistema de tareas programadas (cron jobs)
+```bash
+# Verificar Ollama
+curl http://localhost:11434/api/tags
+
+# Ver modelos instalados
+ollama list
+
+# Logs del servidor
+npm run dev
+```
