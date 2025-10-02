@@ -1,0 +1,42 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --sovereign-red: #FF0000;
+  --sovereign-black: #000000;
+  --sovereign-white: #FFFFFF;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  background-color: var(--sovereign-black);
+  color: var(--sovereign-white);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.glow-red {
+  text-shadow: 0 0 10px var(--sovereign-red),
+               0 0 20px var(--sovereign-red),
+               0 0 30px var(--sovereign-red);
+}
+
+.border-glow {
+  box-shadow: 0 0 10px var(--sovereign-red),
+              0 0 20px var(--sovereign-red);
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}
